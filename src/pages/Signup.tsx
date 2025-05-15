@@ -3,16 +3,17 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Eye, EyeOff, Mail, User, Lock } from 'lucide-react';
 
-const Login: React.FC = () => {
+const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login, error } = useAuth();
+  const { signup, error } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -21,17 +22,17 @@ const Login: React.FC = () => {
     setIsLoading(true);
     
     try {
-      await login(email, password);
+      await signup(email, password, username);
       toast({
         title: 'Welcome to Beatify',
-        description: 'Login successful. Enjoy your music!',
+        description: 'Your account has been created successfully!',
       });
       navigate('/');
     } catch (error) {
       toast({
         variant: "destructive",
-        title: 'Login Failed',
-        description: error instanceof Error ? error.message : 'Invalid credentials',
+        title: 'Signup Failed',
+        description: error instanceof Error ? error.message : 'Unable to create your account',
       });
     } finally {
       setIsLoading(false);
@@ -54,9 +55,27 @@ const Login: React.FC = () => {
       <div className="flex-1 flex flex-col items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="bg-spotify-darkgray rounded-lg p-8 shadow-lg">
-            <h1 className="text-2xl font-bold text-white mb-6 text-center">Log in to Beatify</h1>
+            <h1 className="text-2xl font-bold text-white mb-6 text-center">Sign up for Beatify</h1>
             
             <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label htmlFor="username" className="block text-sm font-medium text-spotify-lightgray mb-1">
+                  Username
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-spotify-lightgray h-5 w-5" />
+                  <Input
+                    type="text"
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your username"
+                    className="pl-10 w-full px-4 py-2 rounded bg-[#333] text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-spotify-green"
+                    required
+                  />
+                </div>
+              </div>
+              
               <div className="mb-4">
                 <label htmlFor="email" className="block text-sm font-medium text-spotify-lightgray mb-1">
                   Email
@@ -68,13 +87,10 @@ const Login: React.FC = () => {
                     id="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="user@example.com"
+                    placeholder="Enter your email"
                     className="pl-10 w-full px-4 py-2 rounded bg-[#333] text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-spotify-green"
                     required
                   />
-                  <p className="text-xs text-spotify-lightgray mt-1">
-                    Use: user@example.com
-                  </p>
                 </div>
               </div>
               
@@ -89,7 +105,7 @@ const Login: React.FC = () => {
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder="Create a password"
                     className="pl-10 w-full px-4 py-2 rounded bg-[#333] text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-spotify-green"
                     required
                   />
@@ -104,9 +120,6 @@ const Login: React.FC = () => {
                       <Eye className="h-5 w-5" />
                     )}
                   </button>
-                  <p className="text-xs text-spotify-lightgray mt-1">
-                    Use: password
-                  </p>
                 </div>
               </div>
               
@@ -115,15 +128,15 @@ const Login: React.FC = () => {
                 disabled={isLoading}
                 className="w-full bg-spotify-green text-black py-3 px-4 rounded-full font-bold hover:bg-opacity-90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Logging in...' : 'Log In'}
+                {isLoading ? 'Creating Account...' : 'Sign Up'}
               </Button>
             </form>
             
             <div className="mt-6 text-center">
               <p className="text-spotify-lightgray">
-                Don't have an account? 
-                <Link to="/signup" className="text-white underline ml-1">
-                  Sign up for Beatify
+                Already have an account?{' '}
+                <Link to="/login" className="text-white underline ml-1">
+                  Log in to Beatify
                 </Link>
               </p>
             </div>
@@ -138,4 +151,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default Signup;

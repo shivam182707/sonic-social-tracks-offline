@@ -7,6 +7,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, username: string) => Promise<void>;
   logout: () => void;
   error: string | null;
 }
@@ -55,6 +56,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signup = async (email: string, password: string, username: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Check if email already exists
+      if (email === 'user@example.com') {
+        throw new Error('Email already in use');
+      }
+      
+      // In a real app, this would be an API call to create a user
+      // For now, we'll simulate user creation with mock data
+      const user: User = {
+        id: Date.now().toString(), // Generate a unique ID
+        username: username,
+        email: email,
+        avatarUrl: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+      };
+      
+      setCurrentUser(user);
+      localStorage.setItem('musicUser', JSON.stringify(user));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Signup failed');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('musicUser');
@@ -65,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: !!currentUser,
     isLoading,
     login,
+    signup,
     logout,
     error
   };

@@ -9,6 +9,7 @@ import { PlayerProvider } from "./contexts/PlayerContext";
 
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Search from "./pages/Search";
 import Chat from "./pages/Chat";
 import Downloads from "./pages/Downloads";
@@ -41,6 +42,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       
       <Route path="/" element={
         <ProtectedRoute>
