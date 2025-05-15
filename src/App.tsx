@@ -39,11 +39,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 };
 
 const AppRoutes = () => {
+  const { isAuthenticated } = useAuth();
+  
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
+      {/* Public routes */}
+      <Route path="/login" element={
+        isAuthenticated ? <Navigate to="/" replace /> : <Login />
+      } />
+      <Route path="/signup" element={
+        isAuthenticated ? <Navigate to="/" replace /> : <Signup />
+      } />
       
+      {/* Protected routes */}
       <Route path="/" element={
         <ProtectedRoute>
           <Index />
@@ -68,6 +76,7 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
+      {/* Fallback route */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

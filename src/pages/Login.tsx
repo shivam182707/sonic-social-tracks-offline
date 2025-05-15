@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -8,13 +8,21 @@ import { Button } from '@/components/ui/button';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('user@example.com'); // Pre-filled for demo
+  const [password, setPassword] = useState('password'); // Pre-filled for demo
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login, error } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Focus on the login button when the page loads for easier access
+  useEffect(() => {
+    const loginButton = document.getElementById('login-button');
+    if (loginButton) {
+      loginButton.focus();
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +48,26 @@ const Login: React.FC = () => {
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+  
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    try {
+      await login('user@example.com', 'password');
+      toast({
+        title: 'Welcome to Beatify',
+        description: 'Demo login successful. Enjoy your music!',
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: 'Demo Login Failed',
+        description: 'Could not log in with demo account. Please try again.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -72,9 +100,6 @@ const Login: React.FC = () => {
                     className="pl-10 w-full px-4 py-2 rounded bg-[#333] text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-spotify-green"
                     required
                   />
-                  <p className="text-xs text-spotify-lightgray mt-1">
-                    Use: user@example.com
-                  </p>
                 </div>
               </div>
               
@@ -104,18 +129,24 @@ const Login: React.FC = () => {
                       <Eye className="h-5 w-5" />
                     )}
                   </button>
-                  <p className="text-xs text-spotify-lightgray mt-1">
-                    Use: password
-                  </p>
                 </div>
               </div>
               
               <Button
+                id="login-button"
                 type="submit"
                 disabled={isLoading}
                 className="w-full bg-spotify-green text-black py-3 px-4 rounded-full font-bold hover:bg-opacity-90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Logging in...' : 'Log In'}
+              </Button>
+              
+              <Button
+                type="button"
+                onClick={handleDemoLogin}
+                className="w-full mt-3 bg-transparent border border-white text-white py-3 px-4 rounded-full font-bold hover:bg-white hover:bg-opacity-10 transition-colors"
+              >
+                Quick Demo Login
               </Button>
             </form>
             
