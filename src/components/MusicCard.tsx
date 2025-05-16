@@ -10,20 +10,45 @@ interface MusicCardProps {
 }
 
 const MusicCard: React.FC<MusicCardProps> = ({ song }) => {
-  const { playSong } = usePlayer();
+  const { playSong, currentSong, isPlaying, pause } = usePlayer();
   const { toast } = useToast();
   
   const handlePlayClick = () => {
-    playSong(song);
+    if (currentSong?.id === song.id && isPlaying) {
+      pause();
+    } else {
+      playSong(song);
+    }
   };
   
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Create a temporary link to trigger download
+    const a = document.createElement('a');
+    
+    // In real app, would use song.audioUrl
+    // Using SoundHelix samples for demo
+    const sampleUrls = [
+      "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+      "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    ];
+    const songIdNumber = parseInt(song.id) || 0;
+    a.href = sampleUrls[songIdNumber % sampleUrls.length];
+    
+    a.download = `${song.title} - ${song.artist}.mp3`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
     toast({
       title: 'Download Started',
       description: `Downloading ${song.title}`,
     });
   };
+
+  const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
 
   return (
     <div className="music-card group cursor-pointer" onClick={handlePlayClick}>
@@ -34,7 +59,7 @@ const MusicCard: React.FC<MusicCardProps> = ({ song }) => {
             className="bg-vector-green text-black rounded-full p-3 hover:scale-105 transition shadow-lg"
             onClick={handlePlayClick}
           >
-            <Play className="h-6 w-6 fill-current" />
+            <Play className={`h-6 w-6 fill-current ${isCurrentlyPlaying ? 'animate-pulse' : ''}`} />
           </button>
         </div>
         <button
@@ -44,6 +69,12 @@ const MusicCard: React.FC<MusicCardProps> = ({ song }) => {
         >
           <Download className="h-4 w-4" />
         </button>
+        
+        {isCurrentlyPlaying && (
+          <div className="absolute top-2 right-2 bg-vector-green text-black text-xs font-bold px-2 py-1 rounded-full">
+            Playing
+          </div>
+        )}
       </div>
       <div className="music-card-info">
         <h3 className="music-card-title">{song.title}</h3>

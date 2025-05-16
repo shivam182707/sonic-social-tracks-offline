@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { Song } from '../types/music';
 
@@ -19,6 +18,8 @@ interface PlayerContextType {
   addToQueue: (song: Song) => void;
   removeFromQueue: (songId: string) => void;
   clearQueue: () => void;
+  updateDuration: (duration: number) => void;
+  updateCurrentTime: (time: number) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -30,14 +31,25 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [queue, setQueue] = useState<Song[]>([]);
+  const [playHistory, setPlayHistory] = useState<Song[]>([]);
   
   const playSong = (song: Song) => {
+    // If we're already playing this song, just resume
+    if (currentSong?.id === song.id) {
+      setIsPlaying(true);
+      return;
+    }
+    
+    // Otherwise, switch to the new song
+    if (currentSong) {
+      setPlayHistory(prev => [currentSong, ...prev.slice(0, 9)]);
+    }
+    
     setCurrentSong(song);
     setIsPlaying(true);
     setCurrentTime(0);
     setDuration(song.duration);
     
-    // In a real application, this would interact with an audio element
     console.log(`Playing song: ${song.title} by ${song.artist}`);
   };
   
@@ -60,12 +72,26 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       playSong(nextSong);
       console.log(`Playing next song: ${nextSong.title}`);
     } else {
+      pause();
       console.log('No more songs in queue');
     }
   };
   
   const previous = () => {
-    console.log('Playing previous song (not implemented)');
+    if (playHistory.length > 0) {
+      const prevSong = playHistory[0];
+      setPlayHistory(playHistory.slice(1));
+      
+      // Add current song to beginning of queue
+      if (currentSong) {
+        setQueue([currentSong, ...queue]);
+      }
+      
+      playSong(prevSong);
+      console.log(`Playing previous song: ${prevSong.title}`);
+    } else {
+      console.log('No previous songs in history');
+    }
   };
   
   const setVolume = (newVolume: number) => {
@@ -93,6 +119,14 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     console.log('Queue cleared');
   };
   
+  const updateDuration = (newDuration: number) => {
+    setDuration(newDuration);
+  };
+  
+  const updateCurrentTime = (time: number) => {
+    setCurrentTime(time);
+  };
+  
   const value = {
     currentSong,
     isPlaying,
@@ -109,7 +143,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     seekTo,
     addToQueue,
     removeFromQueue,
-    clearQueue
+    clearQueue,
+    updateDuration,
+    updateCurrentTime
   };
   
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;

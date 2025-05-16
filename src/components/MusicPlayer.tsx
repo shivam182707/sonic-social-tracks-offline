@@ -16,6 +16,8 @@ export const MusicPlayer: React.FC = () => {
   const { toast } = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioSrc, setAudioSrc] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   
   const {
     currentSong,
@@ -28,53 +30,132 @@ export const MusicPlayer: React.FC = () => {
     next,
     previous,
     setVolume,
-    seekTo
+    seekTo,
+    updateDuration,
+    updateCurrentTime
   } = usePlayer();
 
+  // Initialize audio element
   useEffect(() => {
-    // Create audio element if it doesn't exist
     if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.volume = volume;
+      const audio = new Audio();
+      
+      // Setup event listeners
+      audio.addEventListener('timeupdate', () => {
+        updateCurrentTime(audio.currentTime);
+      });
+      
+      audio.addEventListener('loadedmetadata', () => {
+        updateDuration(audio.duration);
+        setIsLoading(false);
+      });
+      
+      audio.addEventListener('ended', () => {
+        next();
+      });
+      
+      audio.addEventListener('error', (e) => {
+        console.error("Error playing audio:", e);
+        setError("Could not play this track. Please try another song.");
+        setIsLoading(false);
+        toast({
+          title: "Playback Error",
+          description: "Could not play this track. Please try another song.",
+          variant: "destructive"
+        });
+      });
+      
+      audioRef.current = audio;
     }
     
-    // Update audio source when song changes
-    if (currentSong?.audioUrl) {
-      audioRef.current.src = currentSong.audioUrl;
-      setAudioSrc(currentSong.audioUrl);
-      if (isPlaying) {
-        audioRef.current.play();
-      }
-    }
-    
-    // Update play/pause state
-    if (isPlaying) {
-      audioRef.current.play().catch(err => console.error("Error playing audio:", err));
-    } else {
-      audioRef.current.pause();
-    }
-    
-    // Update volume when it changes
-    audioRef.current.volume = volume;
-    
-    // Clean up on unmount
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.src = '';
       }
     };
-  }, [currentSong, isPlaying, volume]);
+  }, []);
   
-  // Update audio position when seekTo changes
+  // Handle song changes
   useEffect(() => {
-    if (audioRef.current && !isNaN(currentTime)) {
+    if (!audioRef.current || !currentSong?.audioUrl) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    // Use appropriate audio URLs - For now we'll use some free sample MP3s
+    // In a real app, you would use the actual song.audioUrl
+    const getWorkingAudioUrl = () => {
+      // For demo, let's use SoundHelix samples based on song ID to always get working audio
+      const sampleUrls = [
+        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"
+      ];
+      
+      // Use song ID to pick a sample, or default to first sample
+      const songIdNumber = parseInt(currentSong.id) || 0;
+      return sampleUrls[songIdNumber % sampleUrls.length];
+    };
+    
+    const audioUrl = getWorkingAudioUrl();
+    audioRef.current.src = audioUrl;
+    audioRef.current.volume = volume;
+    setAudioSrc(audioUrl);
+    
+    if (isPlaying) {
+      audioRef.current.play()
+        .catch(err => {
+          console.error("Error playing audio:", err);
+          setError("Playback error occurred");
+          setIsLoading(false);
+          pause();
+        });
+    }
+  }, [currentSong]);
+  
+  // Handle play/pause changes
+  useEffect(() => {
+    if (!audioRef.current) return;
+    
+    if (isPlaying) {
+      audioRef.current.play()
+        .catch(err => {
+          console.error("Error playing audio:", err);
+          pause();
+        });
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying]);
+  
+  // Handle volume changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+  
+  // Handle seek position
+  useEffect(() => {
+    if (audioRef.current && !isNaN(currentTime) && Math.abs(audioRef.current.currentTime - currentTime) > 1) {
       audioRef.current.currentTime = currentTime;
     }
   }, [currentTime]);
 
   const handleDownload = () => {
     if (currentSong) {
-      // In a real app, this would trigger a download
+      // Create an anchor element and trigger download
+      const a = document.createElement('a');
+      a.href = audioSrc;
+      a.download = `${currentSong.title} - ${currentSong.artist}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
       toast({
         title: 'Download Started',
         description: `Downloading ${currentSong.title}`,
@@ -110,8 +191,12 @@ export const MusicPlayer: React.FC = () => {
               <SkipBack className="h-5 w-5" />
             </button>
             <button 
-              className="bg-white text-black rounded-full p-1.5 hover:scale-105 transition"
+              className={cn(
+                "bg-white text-black rounded-full p-1.5 hover:scale-105 transition",
+                isLoading && "opacity-50"
+              )}
               onClick={isPlaying ? pause : resume}
+              disabled={isLoading}
             >
               {isPlaying ? 
                 <Pause className="h-5 w-5" /> : 
@@ -132,7 +217,7 @@ export const MusicPlayer: React.FC = () => {
             </span>
             <Slider 
               defaultValue={[0]} 
-              max={duration} 
+              max={duration || 100} 
               value={[currentTime]} 
               onValueChange={(values) => seekTo(values[0])}
               className="flex-1"
@@ -165,15 +250,6 @@ export const MusicPlayer: React.FC = () => {
           </div>
         </div>
       </div>
-      
-      {/* Hidden audio element for actual playback */}
-      {audioSrc && (
-        <audio 
-          ref={audioRef}
-          src={audioSrc} 
-          className="hidden"
-        />
-      )}
     </div>
   );
 };
