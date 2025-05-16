@@ -56,7 +56,7 @@ const Index: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-spotify-black text-white overflow-hidden">
+    <div className="flex h-screen bg-vector-black text-white overflow-hidden">
       <Sidebar />
       
       <main className="flex-1 overflow-y-auto pb-24">
@@ -74,7 +74,7 @@ const Index: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-spotify-lightgray text-center py-10">No results found</p>
+                <p className="text-vector-lightgray text-center py-10">No results found</p>
               )}
             </div>
           ) : (
@@ -82,7 +82,7 @@ const Index: React.FC = () => {
               <section className="mb-10">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-bold">Trending songs</h2>
-                  <button className="text-spotify-lightgray text-sm font-bold hover:underline">
+                  <button className="text-vector-lightgray text-sm font-bold hover:underline">
                     Show all
                   </button>
                 </div>
@@ -97,7 +97,7 @@ const Index: React.FC = () => {
               <section className="mb-10">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-bold">Popular artists</h2>
-                  <button className="text-spotify-lightgray text-sm font-bold hover:underline">
+                  <button className="text-vector-lightgray text-sm font-bold hover:underline">
                     Show all
                   </button>
                 </div>
@@ -112,7 +112,7 @@ const Index: React.FC = () => {
               <section className="mb-10">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-bold">Popular albums and singles</h2>
-                  <button className="text-spotify-lightgray text-sm font-bold hover:underline">
+                  <button className="text-vector-lightgray text-sm font-bold hover:underline">
                     Show all
                   </button>
                 </div>

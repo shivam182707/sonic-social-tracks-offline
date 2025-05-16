@@ -31,14 +31,14 @@ const MusicCard: React.FC<MusicCardProps> = ({ song }) => {
         <img src={song.coverUrl} alt={song.title} />
         <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
           <button 
-            className="bg-spotify-green text-black rounded-full p-3 hover:scale-105 transition shadow-lg"
+            className="bg-vector-green text-black rounded-full p-3 hover:scale-105 transition shadow-lg"
             onClick={handlePlayClick}
           >
             <Play className="h-6 w-6 fill-current" />
           </button>
         </div>
         <button
-          className="absolute bottom-2 right-2 bg-spotify-darkgray bg-opacity-70 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-opacity-90"
+          className="absolute bottom-2 right-2 bg-vector-darkgray bg-opacity-70 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-opacity-90"
           onClick={handleDownload}
           title="Download"
         >

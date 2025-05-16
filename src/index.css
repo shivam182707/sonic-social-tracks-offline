@@ -78,7 +78,7 @@
 
 @layer components {
   .music-card {
-    @apply relative flex flex-col overflow-hidden rounded-md bg-spotify-darkgray hover:bg-opacity-80 transition-all duration-200;
+    @apply relative flex flex-col overflow-hidden rounded-md bg-vector-darkgray hover:bg-opacity-80 transition-all duration-200;
   }
   
   .music-card img {
@@ -94,7 +94,7 @@
   }
   
   .music-card-artist {
-    @apply text-xs text-spotify-lightgray mt-1 truncate;
+    @apply text-xs text-vector-lightgray mt-1 truncate;
   }
 
   .artist-card {
