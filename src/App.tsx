@@ -13,6 +13,7 @@ import Signup from "./pages/Signup";
 import Search from "./pages/Search";
 import Chat from "./pages/Chat";
 import Downloads from "./pages/Downloads";
+import Playlists from "./pages/Playlists";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,7 +27,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const location = useLocation();
   
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-spotify-black">
+    return <div className="min-h-screen flex items-center justify-center bg-vector-black">
       <div className="text-white">Loading...</div>
     </div>;
   }
@@ -73,6 +74,12 @@ const AppRoutes = () => {
       <Route path="/downloads" element={
         <ProtectedRoute>
           <Downloads />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/playlists" element={
+        <ProtectedRoute>
+          <Playlists />
         </ProtectedRoute>
       } />
       
